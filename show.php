@@ -2,10 +2,10 @@
 session_start();
 
 	require('db_connect.php');
-echo($_SESSION['id']);
+
   
     $_SESSION['gameID']= filter_input(INPUT_GET, 'id', FILTER_SANITIZE_NUMBER_INT);
-	  echo($_SESSION['gameID']);
+	
     
     
     $query = "SELECT Games.gameName, Games.gameDescription, games.reviewScore FROM Games  
@@ -23,7 +23,8 @@ echo($_SESSION['id']);
     JOIN bridgeTable ON games.gameID=bridgetable.gameID
     JOIN Reviews ON BridgeTable.reviewID=Reviews.reviewID
     JOIN Users ON reviews.userID=Users.userID 
-    WHERE games.gameid = :id";
+    WHERE games.gameid = :id
+    ORDER BY reviews.reviewID DESC";
      
     $commentStatement = $db->prepare($commentquery);	
     
@@ -92,10 +93,15 @@ echo($_SESSION['id']);
       <div class="card-body">
         <h4 class="card-title"><?=$commentRow['UserName'] ?></h4>
         <h5 class="card-subtitle mb-3 text-muted"><?= $commentRow['reviewContent'] ?></h5>
-        <?php if($_SESSION['isAdmin']== 1 || $_SESSION['id']== $commentRow['userID']):?>       
-        <small><a href="edit.php?reviewid=<?=$commentRow['reviewID']?>
+        <?php if($_SESSION['isAdmin']== 1 || $_SESSION['loggedin']== 1):?>      
+          <?php if($_SESSION['id']== $commentRow['userID']) :?>
+        
+          <small><a href="edit.php?reviewid=<?=$commentRow['reviewID']?>
           &userid=<?=$commentRow['userID']?>
           &username=<?=$commentRow['UserName']?>"> Edit</a></small>
+        
+        
+          <?php endif?>
         <?php endif?>       
       </div>
     
