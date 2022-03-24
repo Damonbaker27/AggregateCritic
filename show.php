@@ -7,8 +7,8 @@ session_start();
     $_SESSION['gameID']= filter_input(INPUT_GET, 'id', FILTER_SANITIZE_NUMBER_INT);
 	
     
-    
-    $query = "SELECT Games.gameName, Games.gameDescription, games.reviewScore FROM Games  
+    //query the database for the game passed thorough the get.
+    $query = "SELECT Games.gameName, Games.gameDescription, games.reviewScore, games.imageID FROM Games  
       WHERE games.gameid = :id";
        
     $statement = $db->prepare($query);	
@@ -17,7 +17,7 @@ session_start();
     $statement->execute();
 	  $row = $statement->fetch();
 
-  
+    //get the comments associated with that game.
     $commentquery = "SELECT Reviews.reviewContent, reviews.reviewID, Users.UserName, Users.userID 
     FROM Games 
     JOIN bridgeTable ON games.gameID=bridgetable.gameID
@@ -26,13 +26,18 @@ session_start();
     WHERE games.gameid = :id
     ORDER BY reviews.reviewID DESC";
      
-    $commentStatement = $db->prepare($commentquery);	
-    
+    $commentStatement = $db->prepare($commentquery);	 
     $id = filter_input(INPUT_GET, 'id', FILTER_SANITIZE_NUMBER_INT);
     $commentStatement->bindValue('id', $id, PDO::PARAM_INT);
-    
     $commentStatement->execute();
 
+    
+    //query the database for the game image
+    $imageQuery = "SELECT imagePath FROM images where imageID = :imageID";
+    $imageStatement = $db->prepare($imageQuery);
+    $imageStatement->bindValue(':imageID', $row['imageID'], PDO::PARAM_INT);
+    $imageStatement->execute();
+    $imagerow = $imageStatement->fetch();
     
 
 
@@ -74,7 +79,7 @@ session_start();
   <div class="card" style="max-width: 500px";>
     <div class="row g-0" >
       <div class="col-sm-5">
-        <img src="boxart.png" class="card-img-top h-100" alt="Game Box art">
+        <img src="<?=$imagerow['imagePath']?>" class="card-img-top h-100" alt="<?=$imagerow['imagePath']?>">
         
       </div>
       <div class="col-sm-7">
