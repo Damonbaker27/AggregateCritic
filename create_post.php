@@ -70,7 +70,7 @@ use \Gumlet\ImageResize;
         }elseif(in_array(mime_content_type($_FILES['file']['tmp_name']),$allowed_image_mime_types)){           
             
             if(file_is_an_image($temporary_image_path, $new_image_path)){     
-                /*
+                
                 $imagemedium = new ImageResize($temporary_image_path);
                 $imagemedium->resizeToWidth(400);
                 $imagemedium->save($new_image_path.'_medium_'.$originalname); 
@@ -78,13 +78,11 @@ use \Gumlet\ImageResize;
                 $imagethumb = new ImageResize($temporary_image_path);
                 $imagethumb->resizeToWidth(50);
                 $imagemedium->save($new_image_path.'_thumb_'.$originalname);
-                */
+                
 
                 //move the new image to the upload folder.
                 move_uploaded_file($temporary_image_path, $new_image_path);
-                echo($temporary_image_path);
-                echo($new_image_path);
-                echo("uploading file");
+                
                 
                 if(isset($_POST['gameName']) && isset($_POST['gameDescription'])){
                     //insert the new image path into database.
@@ -122,6 +120,8 @@ use \Gumlet\ImageResize;
 
                     //execute the query.
                     $updateStatement->execute();
+
+                    header("location: index.php");
                     
                 }   
             }
