@@ -8,36 +8,6 @@ use \Gumlet\ImageResize;
 
     require('db_connect.php');
 
-    if($_POST && isset($_POST['gameName']) && isset($_POST['gameDescription'])){
-
-       
-        $gameName = filter_input(INPUT_POST, 'gameName', FILTER_SANITIZE_FULL_SPECIAL_CHARS);    
-        $description = filter_input(INPUT_POST, 'gameDescription', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-        $score = filter_input(INPUT_POST, 'score', FILTER_SANITIZE_FULL_SPECIAL_CHARS);    
-
-        $query = "INSERT INTO games (gameName, gameDescription, reviewScore) VALUES (:gameName, :gameDescription, :score)";
-
-        $statement = $db->prepare($query);
-
-
-        $statement->bindValue(":gameName", $gameName);
-        $statement->bindValue(":gameDescription", $description);
-        $statement->bindValue(":score", $score);
-        
-
-        $statement->execute();
-
-
-        
-        
-
-    }
-    
-
-    
-    
-    
-    
     // file_upload_path() - Safely build a path String that uses slashes appropriate for our OS.
    // Default upload path is an 'uploads' sub-folder in the current folder.
    function file_upload_path($original_filename, $upload_subfolder_name = 'uploads') {
@@ -93,42 +63,86 @@ use \Gumlet\ImageResize;
         
         
         
-       if(in_array(mime_content_type($_FILES['file']['tmp_name']),$allowed_file_mime_types)){
-          
+       if(in_array(mime_content_type($_FILES['file']['tmp_name']),$allowed_file_mime_types)){    
            if(File_Is_Other($temporary_image_path, $new_image_path)){     
                move_uploaded_file($temporary_image_path, $new_image_path);           
            }        
-       } elseif(in_array(mime_content_type($_FILES['file']['tmp_name']),$allowed_image_mime_types)){           
+        }elseif(in_array(mime_content_type($_FILES['file']['tmp_name']),$allowed_image_mime_types)){           
+            
+            if(file_is_an_image($temporary_image_path, $new_image_path)){     
+                /*
+                $imagemedium = new ImageResize($temporary_image_path);
+                $imagemedium->resizeToWidth(400);
+                $imagemedium->save($new_image_path.'_medium_'.$originalname); 
 
-               
-               if(file_is_an_image($temporary_image_path, $new_image_path)){
+                $imagethumb = new ImageResize($temporary_image_path);
+                $imagethumb->resizeToWidth(50);
+                $imagemedium->save($new_image_path.'_thumb_'.$originalname);
+                */
+
+                //move the new image to the upload folder.
+                move_uploaded_file($temporary_image_path, $new_image_path);
+                echo($temporary_image_path);
+                echo($new_image_path);
+                echo("uploading file");
+                
+                if(isset($_POST['gameName']) && isset($_POST['gameDescription'])){
+                    //insert the new image path into database.
+                    $imageQuery = "INSERT INTO images (imagePath, imageName) VALUES (:imagePath, :image)" ;
+
+                    $imageStatement = $db->prepare($imageQuery);
+                    $imageStatement->bindValue(":imagePath", $new_image_path);
+                    $imageStatement->bindValue(":image", $originalname);
+                    $imageStatement ->execute();
+            
+                    //get the last imageID added to database. I know this is stupid.
+                    $gamesQuery = "SELECT imageID  FROM images  
+                    WHERE imageID = (SELECT max(imageID) FROM images)";
+                    $gameStatement = $db->prepare($gamesQuery);
+                    $gameStatement ->execute();      
+                    $imageRow = $gameStatement->fetch();
+                    
+                    
+                    //Sanitize the inputs from the creation form.
+                    $gameName = filter_input(INPUT_POST, 'gameName', FILTER_SANITIZE_FULL_SPECIAL_CHARS);    
+                    $description = filter_input(INPUT_POST, 'gameDescription', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+                    $score = filter_input(INPUT_POST, 'score', FILTER_SANITIZE_FULL_SPECIAL_CHARS);    
+                        
+                    //insert the values into the games table along with the new image id from the last query.
+                    $updateQuery = "INSERT INTO games (gameName, gameDescription, reviewScore, imageID) 
+                        VALUES (:gameName, :gameDescription, :score, :imageID)";      
+                    
+                    $updateStatement = $db->prepare($updateQuery);
+            
+                    //bind the value to the placeholder in the query.
+                    $updateStatement->bindValue(":gameName", $gameName);
+                    $updateStatement->bindValue(":gameDescription", $description);
+                    $updateStatement->bindValue(":score", $score); 
+                    $updateStatement->bindValue(":imageID", $imageRow['imageID']);
+
+                    //execute the query.
+                    $updateStatement->execute();
+                    
+                }   
+            }
+           
+        }     
+    }
+
+
     
-                   
-                   $imagemedium = new ImageResize($temporary_image_path);
-                   $imagemedium->resizeToWidth(400);
-                   $imagemedium->save($new_image_path.'_medium_'.$originalname); 
+    
 
-                   $imagethumb = new ImageResize($temporary_image_path);
-                   $imagethumb->resizeToWidth(50);
-                   $imagemedium->save($new_image_path.'_thumb_'.$originalname);
-                   
-                   move_uploaded_file($temporary_image_path, $new_image_path);
-               }
-               
-           }
-           header("Location: index.php");
-   } 
 
 
 ?>
 
-?>
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="styles3.css" type="text/css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <title>Error</title>
 </head>
 <body>
