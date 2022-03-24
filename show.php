@@ -94,7 +94,7 @@ session_start();
         <h4 class="card-title"><?=$commentRow['UserName'] ?></h4>
         <h5 class="card-subtitle mb-3 text-muted"><?= $commentRow['reviewContent'] ?></h5>
         <?php if($_SESSION['isAdmin']== 1 || $_SESSION['loggedin']== 1):?>      
-          <?php if($_SESSION['id']== $commentRow['userID']) :?>
+          <?php if($_SESSION['id']== $commentRow['userID'] || $_SESSION['isAdmin']== 1) :?>
         
           <small><a href="edit.php?reviewid=<?=$commentRow['reviewID']?>
           &userid=<?=$commentRow['userID']?>
