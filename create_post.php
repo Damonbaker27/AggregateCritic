@@ -72,16 +72,17 @@ use \Gumlet\ImageResize;
             if(file_is_an_image($temporary_image_path, $new_image_path)){     
                 
                 $imagemedium = new ImageResize($temporary_image_path);
-                $imagemedium->resizeToWidth(400);
+                $imagemedium->resizeToBestFit(400, 600);
                 $imagemedium->save($new_image_path.'_medium_'.$originalname); 
 
+                /*
                 $imagethumb = new ImageResize($temporary_image_path);
                 $imagethumb->resizeToWidth(50);
                 $imagemedium->save($new_image_path.'_thumb_'.$originalname);
-                
+                */
 
                 //move the new image to the upload folder.
-                move_uploaded_file($temporary_image_path, $new_image_path);
+               // move_uploaded_file($temporary_image_path, $new_image_path);
                 
                 
                 if(isset($_POST['gameName']) && isset($_POST['gameDescription'])){
@@ -126,7 +127,9 @@ use \Gumlet\ImageResize;
                 }   
             }
            
-        }     
+        } else{
+            echo("only images allowed");
+        }    
     }
 
 

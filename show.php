@@ -7,7 +7,7 @@ session_start();
     $_SESSION['gameID']= filter_input(INPUT_GET, 'id', FILTER_SANITIZE_NUMBER_INT);
 	
     
-    //query the database for the game passed thorough the get.
+    //query the database for the game passed through the get.
     $query = "SELECT Games.gameName, Games.gameDescription, games.reviewScore, games.imageID FROM Games  
       WHERE games.gameid = :id";
        
@@ -18,7 +18,7 @@ session_start();
 	  $row = $statement->fetch();
 
     //get the comments associated with that game.
-    $commentquery = "SELECT Reviews.reviewContent, reviews.reviewID, Users.UserName, Users.userID 
+    $commentquery = "SELECT Reviews.reviewContent, reviews.reviewID, Users.UserName, Users.userID, reviews.userScore 
     FROM Games 
     JOIN bridgeTable ON games.gameID=bridgetable.gameID
     JOIN Reviews ON BridgeTable.reviewID=Reviews.reviewID
@@ -58,7 +58,9 @@ session_start();
 
 <nav class="nav nav-pills nav-fill">  
     <a href="index.php"  class="nav-item nav-link"> Home</a>      
+    <?php if($_SESSION['isAdmin']== 1):?>
     <a href="create.php" class="nav-item nav-link" >New Review</a>
+    <?php endif ?>
       
       <?php if($_SESSION['loggedin']== 1):?>           
         <a href="logout.php"class="nav-item nav-link" >Logout</a>  
@@ -97,6 +99,7 @@ session_start();
       
       <div class="card-body">
         <h4 class="card-title"><?=$commentRow['UserName'] ?></h4>
+        <h5 class="card-subtitle mb-3 text-muted"><?= $commentRow['userScore'] ?>/10</h5>
         <h5 class="card-subtitle mb-3 text-muted"><?= $commentRow['reviewContent'] ?></h5>
         <?php if($_SESSION['isAdmin']== 1 || $_SESSION['loggedin']== 1):?>      
           <?php if($_SESSION['id']== $commentRow['userID'] || $_SESSION['isAdmin']== 1) :?>

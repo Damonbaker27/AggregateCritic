@@ -71,11 +71,11 @@ if(isset($_POST['username']) && isset($_POST['password'])){
             $sanitizedPassword = password_hash($password, PASSWORD_DEFAULT);
             
             if($statement->execute()){
-                echo("inserted into table");
+                //echo("inserted into table");
                 $query = "SELECT userID, isAdmin FROM users WHERE userName = :username";
                     
                 if($statement = $db->prepare($query)){
-                    echo('statement exceuted');
+                   // echo('statement exceuted');
                     $sanitizedUsername = $_POST["username"];
                     $statement->bindValue(":username", $_POST["username"], PDO::PARAM_STR);
                         
@@ -87,10 +87,7 @@ if(isset($_POST['username']) && isset($_POST['password'])){
                         $_SESSION['loggedin']= true;
                         $_SESSION['isAdmin'] = $row['isAdmin'];
 
-                        echo($row['userID']);
-                        echo($_POST["username"]);
-                        echo($row['isAdmin']);
-
+                        header("location: index.php");
 
 
                     }
@@ -130,7 +127,9 @@ if(isset($_POST['username']) && isset($_POST['password'])){
 
 <nav class="nav nav-pills nav-fill">  
     <a href="index.php"  class="nav-item nav-link"> Home</a>      
+    <?php if($_SESSION['isAdmin']== 1):?>
     <a href="create.php" class="nav-item nav-link" >New Review</a>
+    <?php endif ?>
       
       <?php if($_SESSION['loggedin']== 1):?>           
         <a href="logout.php"class="nav-item nav-link" >Logout</a>  
@@ -154,7 +153,12 @@ if(isset($_POST['username']) && isset($_POST['password'])){
             
             <p>
             <label for="password">Password</label>
-            <input name="password" id="password" />
+            <input name="password" id="password" type="password" />
+            </p>
+            
+            <p>
+            <label for="password">Re-enter Password</label>
+            <input name="password" id="password" type="password" placeholder=" Re-enter Password" />
             </p>
         
  

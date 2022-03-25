@@ -47,8 +47,9 @@
 
   <nav class="nav nav-pills nav-fill">  
     <a href="index.php"  class="nav-item nav-link active"> Home</a>      
+    <?php if($_SESSION['isAdmin']== 1):?>
     <a href="create.php" class="nav-item nav-link" >New Review</a>
-      
+    <?php endif ?> 
       <?php if($_SESSION['loggedin']== 1):?>           
         <a href="logout.php"class="nav-item nav-link" >Sign out</a>  
       <?php endif ?>
