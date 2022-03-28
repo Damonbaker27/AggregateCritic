@@ -39,7 +39,7 @@ session_start();
     $imageStatement->execute();
     $imagerow = $imageStatement->fetch();
     
-
+  echo($imagerow['imagePath']);
 
 ?>
 <!DOCTYPE html>
@@ -58,7 +58,7 @@ session_start();
 
 <nav class="nav nav-pills nav-fill">  
     <a href="index.php"  class="nav-item nav-link"> Home</a>      
-    <?php if($_SESSION['isAdmin']== 1):?>
+    <?php if($_SESSION['roleLevel']> 0):?>
     <a href="create.php" class="nav-item nav-link" >New Review</a>
     <?php endif ?>
       
@@ -81,7 +81,7 @@ session_start();
   <div class="card" style="max-width: 500px";>
     <div class="row g-0" >
       <div class="col-sm-5">
-        <img src="<?=$imagerow['imagePath']?>" class="card-img-top h-100" alt="<?=$imagerow['imagePath']?>">
+        <img src="uploads/boxart.jpg" class="card-img-top h-100" alt="<?=$imagerow['imagePath']?>">
         
       </div>
       <div class="col-sm-7">
@@ -101,8 +101,8 @@ session_start();
         <h4 class="card-title"><?=$commentRow['UserName'] ?></h4>
         <h5 class="card-subtitle mb-3 text-muted"><?= $commentRow['userScore'] ?>/10</h5>
         <h5 class="card-subtitle mb-3 text-muted"><?= $commentRow['reviewContent'] ?></h5>
-        <?php if($_SESSION['isAdmin']== 1 || $_SESSION['loggedin']== 1):?>      
-          <?php if($_SESSION['id']== $commentRow['userID'] || $_SESSION['isAdmin']== 1) :?>
+        <?php if($_SESSION['roleLevel']== 1 || $_SESSION['loggedin']== 1):?>      
+          <?php if($_SESSION['id']== $commentRow['userID'] || $_SESSION['roleLevel']== 1) :?>
         
           <small><a href="edit.php?reviewid=<?=$commentRow['reviewID']?>
           &userid=<?=$commentRow['userID']?>

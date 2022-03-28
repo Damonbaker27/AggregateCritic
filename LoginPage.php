@@ -39,7 +39,7 @@ if(isset($_SESSION["loggedin"]) && $_SESSION["loggedin"]===true){
     //checks if there are any empty fields
     if(!$userNameErrorFlag && !$passwordErrorFlag){
       echo('no errors');
-      $query = "SELECT userID, userName, password, isAdmin FROM users WHERE userName = :username";
+      $query = "SELECT userID, userName, password, roleLevel FROM users WHERE userName = :username";
 
       if($statement = $db->prepare($query)){
         echo('statement prepared');
@@ -67,7 +67,7 @@ if(isset($_SESSION["loggedin"]) && $_SESSION["loggedin"]===true){
                   $_SESSION["username"]= $username;
                   $_SESSION["id"] = $id;
                   $_SESSION["loggedin"] = true;
-                  $_SESSION['isAdmin']= $row['isAdmin'];
+                  $_SESSION['roleLevel']= $row['roleLevel'];
 
                   
                   header("location: index.php");
@@ -108,7 +108,7 @@ if(isset($_SESSION["loggedin"]) && $_SESSION["loggedin"]===true){
 
 <nav class="nav nav-pills nav-fill">  
     <a href="index.php"  class="nav-item nav-link"> Home</a>      
-    <?php if($_SESSION['isAdmin']== 1):?>
+    <?php if($_SESSION['roleLevel']== 1):?>
     <a href="create.php" class="nav-item nav-link" >New Review</a>
     <?php endif ?>
       

@@ -49,13 +49,14 @@ session_start();
             <textarea name="gameDescription" id="gameDescription" class="form-control" placeholder="Description here..."></textarea>
         </div>
         
-        <label for='file'>Image Filename:</label>
-         <input type='file' name='file' id='file'>
+        <label for='image'>Image Filename:</label>
+         <input type='file' name='file' id='image'>
          <!--<input type='submit' name='submit' value='Upload Image'>-->
             
         <div class="px-3">
             <input type="submit" name="command" value="Create" class="btn btn-primary" />
         </div>
+
     </fieldset>
 </form>
 

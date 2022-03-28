@@ -59,20 +59,20 @@ if(isset($_POST['username']) && isset($_POST['password'])){
 
     if(!$userNameErrorFlag && !$passwordErrorFlag){
         
-        $query = "INSERT INTO users (userName, password, isAdmin) VALUES (:username, :password, :isAdmin)";
+        $query = "INSERT INTO users (userName, password, roleLevel) VALUES (:username, :password, :roleLevel)";
          
         if($statement = $db->prepare($query)){
             $statement->bindParam(":username", $sanitizedUsername, PDO::PARAM_STR);
             $statement->bindParam(":password", $sanitizedPassword, PDO::PARAM_STR);
-            $statement->bindParam(":isAdmin", $isAdmin, PDO::PARAM_INT);
+            $statement->bindParam(":roleLevel", $roleLevel, PDO::PARAM_INT);
             
-            $isAdmin = true;
+            $roleLevel = 0;
             $sanitizedUsername = $username;
             $sanitizedPassword = password_hash($password, PASSWORD_DEFAULT);
             
             if($statement->execute()){
                 //echo("inserted into table");
-                $query = "SELECT userID, isAdmin FROM users WHERE userName = :username";
+                $query = "SELECT userID, roleLevel FROM users WHERE userName = :username";
                     
                 if($statement = $db->prepare($query)){
                    // echo('statement exceuted');
@@ -85,7 +85,7 @@ if(isset($_POST['username']) && isset($_POST['password'])){
                         $_SESSION['id']= $row['userID'];
                         $_SESSION['username']=$sanitizedUsername;
                         $_SESSION['loggedin']= true;
-                        $_SESSION['isAdmin'] = $row['isAdmin'];
+                        $_SESSION['roleLevel'] = $row['roleLevel'];
 
                         header("location: index.php");
 
@@ -127,7 +127,7 @@ if(isset($_POST['username']) && isset($_POST['password'])){
 
 <nav class="nav nav-pills nav-fill">  
     <a href="index.php"  class="nav-item nav-link"> Home</a>      
-    <?php if($_SESSION['isAdmin']== 1):?>
+    <?php if($_SESSION['roleLevel']== 1):?>
     <a href="create.php" class="nav-item nav-link" >New Review</a>
     <?php endif ?>
       

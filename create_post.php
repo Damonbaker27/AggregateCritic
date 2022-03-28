@@ -60,6 +60,7 @@ use \Gumlet\ImageResize;
         $allowed_file_mime_types = ['application/pdf'];
         $allowed_image_mime_types = ['image/gif', 'image/jpeg', 'image/png'];
        $originalname = basename($image_filename);
+       $databaselocation = 'uploads'. '/' . $image_filename;
         
         
         
@@ -73,7 +74,7 @@ use \Gumlet\ImageResize;
                 
                 $imagemedium = new ImageResize($temporary_image_path);
                 $imagemedium->resizeToBestFit(400, 600);
-                $imagemedium->save($new_image_path.'_medium_'.$originalname); 
+                $imagemedium->save($new_image_path); 
 
                 /*
                 $imagethumb = new ImageResize($temporary_image_path);
@@ -90,7 +91,7 @@ use \Gumlet\ImageResize;
                     $imageQuery = "INSERT INTO images (imagePath, imageName) VALUES (:imagePath, :image)" ;
 
                     $imageStatement = $db->prepare($imageQuery);
-                    $imageStatement->bindValue(":imagePath", $new_image_path);
+                    $imageStatement->bindValue(":imagePath", $databaselocation );
                     $imageStatement->bindValue(":image", $originalname);
                     $imageStatement ->execute();
             
