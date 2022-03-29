@@ -11,7 +11,7 @@ session_start();
     
     //query the database for the game passed through the get.
     $query = "SELECT Games.gameName, games.gameID, Games.gameDescription, games.reviewScore, games.imageID, images.imagePath FROM Games
-    JOIN Images ON images.imageID = games.imageID  
+    LEFT OUTER JOIN Images ON images.imageID = games.imageID  
       WHERE games.gameid = :id";
        
     $statement = $db->prepare($query);	
@@ -59,7 +59,7 @@ session_start();
     </div>
     <?php endif ?>   
         
-    <input type="hidden" id="imagePath" name="imagePath" value="<?=$row['imagePath']?>">
+        <input type="hidden" id="imagePath" name="imagePath" value="<?=$row['imagePath']?>">
         <input type="hidden" id="imageID" name="imageID" value="<?=$row['imageID']?>">
         <input type="hidden" id="gameID" name="gameID" value="<?=$row['gameID']?>">
     
