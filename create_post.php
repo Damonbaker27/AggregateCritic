@@ -1,12 +1,16 @@
 <?php
 session_start();
 
-require 'C:\xampp\htdocs\wd2\Challenges\Challenge 7\php-image-resize-master\lib\ImageResize.php';
-require 'C:\xampp\htdocs\wd2\Challenges\Challenge 7\php-image-resize-master\lib\ImageResizeException.php';
+require 'C:\xampp\htdocs\wd2\Project\php-image-resize-master\lib\ImageResize.php';
+require 'C:\xampp\htdocs\wd2\Project\php-image-resize-master\lib\ImageResizeException.php';
 use \Gumlet\ImageResize;
-    require 'authenticate.php';
 
-    require('db_connect.php');
+require('db_connect.php');
+
+
+
+
+
 
     // file_upload_path() - Safely build a path String that uses slashes appropriate for our OS.
    // Default upload path is an 'uploads' sub-folder in the current folder.
@@ -34,20 +38,6 @@ use \Gumlet\ImageResize;
         return $file_extension_is_valid && $mime_type_is_valid;
     }
     
-    function File_Is_Other($temporary_path, $new_path){
-       $allowed_mime_types = ['application/pdf'];
-       $allowed_file_extensions = ['pdf'];
-
-       $actual_mime_type= mime_content_type($temporary_path);
-       echo($actual_mime_type);
-       $actual_file_extension   = pathinfo($new_path, PATHINFO_EXTENSION);
-       
-       $mime_type_is_valid      = in_array($actual_mime_type, $allowed_mime_types);
-       $file_extension_is_valid = in_array($actual_file_extension, $allowed_file_extensions);
-
-       return $file_extension_is_valid && $mime_type_is_valid;
-    }
-    
     $file_upload_detected = isset($_FILES['file']) && ($_FILES['file']['error'] === 0);
     
     $upload_error_detected = isset($_FILES['file']) && ($_FILES['file']['error'] > 0);
@@ -61,81 +51,82 @@ use \Gumlet\ImageResize;
         $allowed_image_mime_types = ['image/gif', 'image/jpeg', 'image/png'];
        $originalname = basename($image_filename);
        $databaselocation = 'uploads'. '/' . $image_filename;
-        
-        
-        
-       if(in_array(mime_content_type($_FILES['file']['tmp_name']),$allowed_file_mime_types)){    
-           if(File_Is_Other($temporary_image_path, $new_image_path)){     
-               move_uploaded_file($temporary_image_path, $new_image_path);           
-           }        
-        }elseif(in_array(mime_content_type($_FILES['file']['tmp_name']),$allowed_image_mime_types)){           
-            
-            if(file_is_an_image($temporary_image_path, $new_image_path)){     
-                
-                $imagemedium = new ImageResize($temporary_image_path);
-                $imagemedium->resizeToBestFit(400, 600);
-                $imagemedium->save($new_image_path); 
-
-                /*
-                $imagethumb = new ImageResize($temporary_image_path);
-                $imagethumb->resizeToWidth(50);
-                $imagemedium->save($new_image_path.'_thumb_'.$originalname);
-                */
-
-                //move the new image to the upload folder.
-               // move_uploaded_file($temporary_image_path, $new_image_path);
-                
-                
-                if(isset($_POST['gameName']) && isset($_POST['gameDescription'])){
-                    //insert the new image path into database.
-                    $imageQuery = "INSERT INTO images (imagePath, imageName) VALUES (:imagePath, :image)" ;
-
-                    $imageStatement = $db->prepare($imageQuery);
-                    $imageStatement->bindValue(":imagePath", $databaselocation );
-                    $imageStatement->bindValue(":image", $originalname);
-                    $imageStatement ->execute();
-            
-                    //get the last imageID added to database. I know this is stupid.
-                    $gamesQuery = "SELECT imageID  FROM images  
-                    WHERE imageID = (SELECT max(imageID) FROM images)";
-                    $gameStatement = $db->prepare($gamesQuery);
-                    $gameStatement ->execute();      
-                    $imageRow = $gameStatement->fetch();
-                    
-                    
-                    //Sanitize the inputs from the creation form.
-                    $gameName = filter_input(INPUT_POST, 'gameName', FILTER_SANITIZE_FULL_SPECIAL_CHARS);    
-                    $description = filter_input(INPUT_POST, 'gameDescription', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-                    $score = filter_input(INPUT_POST, 'score', FILTER_SANITIZE_FULL_SPECIAL_CHARS);    
-                        
-                    //insert the values into the games table along with the new image id from the last query.
-                    $updateQuery = "INSERT INTO games (gameName, gameDescription, reviewScore, imageID) 
-                        VALUES (:gameName, :gameDescription, :score, :imageID)";      
-                    
-                    $updateStatement = $db->prepare($updateQuery);
-            
-                    //bind the value to the placeholder in the query.
-                    $updateStatement->bindValue(":gameName", $gameName);
-                    $updateStatement->bindValue(":gameDescription", $description);
-                    $updateStatement->bindValue(":score", $score); 
-                    $updateStatement->bindValue(":imageID", $imageRow['imageID']);
-
-                    //execute the query.
-                    $updateStatement->execute();
-
-                    header("location: index.php");
-                    
-                }   
-            }
-           
-        } else{
-            echo("only images allowed");
-        }    
+          
+       if(in_array(mime_content_type($_FILES['file']['tmp_name']),$allowed_image_mime_types)){                   
+            if(file_is_an_image($temporary_image_path, $new_image_path)){             
+                $image = new ImageResize($databaselocation);
+                $image->resize(100, 200);
+                $image->save($new_image_path);     
+            }   
+        }           
     }
 
+    
+    if(isset($_POST['gameName']) && isset($_POST['gameDescription'])){
+        //insert the new image path into database.
+        if($file_upload_detected){
+            $imageQuery = "INSERT INTO images (imagePath, imageName) VALUES (:imagePath, :image)" ;
+            $imageStatement = $db->prepare($imageQuery);
+            $imageStatement->bindValue(":imagePath", $databaselocation );
+            $imageStatement->bindValue(":image", $originalname);
+            $imageStatement ->execute();
 
-    
-    
+            //get the last imageID added to database. I know this is stupid.
+            $gamesQuery = "SELECT imageID  FROM images  
+            WHERE imageID = (SELECT max(imageID) FROM images)";
+            $gameStatement = $db->prepare($gamesQuery);
+            $gameStatement ->execute();      
+            $imageRow = $gameStatement->fetch();
+
+            //Sanitize the inputs from the creation form.
+            $gameName = filter_input(INPUT_POST, 'gameName', FILTER_SANITIZE_FULL_SPECIAL_CHARS);    
+            $description = filter_input(INPUT_POST, 'gameDescription', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+            $score = filter_input(INPUT_POST, 'score', FILTER_SANITIZE_FULL_SPECIAL_CHARS);    
+                
+            //insert the values into the games table along with the new image id from the last query.
+            $updateQuery = "INSERT INTO games (gameName, gameDescription, reviewScore, imageID) 
+                VALUES (:gameName, :gameDescription, :score, :imageID)";      
+            
+            $updateStatement = $db->prepare($updateQuery);
+
+            //bind the value to the placeholder in the query.
+            $updateStatement->bindValue(":gameName", $gameName);
+            $updateStatement->bindValue(":gameDescription", $description);
+            $updateStatement->bindValue(":score", $score); 
+            $updateStatement->bindValue(":imageID", $imageRow['imageID']);
+
+            //execute the query.
+            $updateStatement->execute(); 
+            echo('game added with image');
+            header("location: index.php"); 
+
+
+        }else{
+
+                
+            //Sanitize the inputs from the creation form.
+            $gameName = filter_input(INPUT_POST, 'gameName', FILTER_SANITIZE_FULL_SPECIAL_CHARS);    
+            $description = filter_input(INPUT_POST, 'gameDescription', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+            $score = filter_input(INPUT_POST, 'score', FILTER_SANITIZE_FULL_SPECIAL_CHARS);    
+                
+            //insert the values into the games table.
+            $updateQuery = "INSERT INTO games (gameName, gameDescription, reviewScore) 
+                VALUES (:gameName, :gameDescription, :score)";      
+            $updateStatement = $db->prepare($updateQuery);
+
+            //bind the value to the placeholder in the query.
+            $updateStatement->bindValue(":gameName", $gameName);
+            $updateStatement->bindValue(":gameDescription", $description);
+            $updateStatement->bindValue(":score", $score); 
+
+            //execute the query.
+            $updateStatement->execute();
+            echo("game added without image");  
+            //header("location: index.php");
+        }
+           
+          
+    }
 
 
 

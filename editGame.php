@@ -7,39 +7,20 @@ session_start();
 
 	
     
-    if ($_POST && !empty($_POST['reviewcontent']) && !empty($_POST['reviewid'])) {
-        
-        $userid  = filter_input(INPUT_POST, 'userid', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-        $reviewcontent = filter_input(INPUT_POST, 'reviewcontent', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-        $reviewid = filter_input(INPUT_POST, 'reviewid', FILTER_SANITIZE_NUMBER_INT);
-
-        
-        $query = "UPDATE reviews SET reviewContent = :reviewcontent WHERE userID = :userid 
-                AND reviewID = :reviewid";
-        
-        if($statement = $db->prepare($query)){
-            $statement->bindValue(':reviewcontent', $reviewcontent, PDO::PARAM_STR);
-            $statement->bindValue(':userid', $userid, PDO::PARAM_INT);
-            $statement->bindValue(':reviewid', $reviewid, PDO::PARAM_INT);
-            
-            if($statement->execute()){
-                header("Location: show.php?id=" .$_SESSION['gameID']);
-            }
-        
-        }   
+	
+    
+    //query the database for the game passed through the get.
+    $query = "SELECT Games.gameName, games.gameID, Games.gameDescription, games.reviewScore, games.imageID, images.imagePath FROM Games
+    JOIN Images ON images.imageID = games.imageID  
+      WHERE games.gameid = :id";
+       
+    $statement = $db->prepare($query);	
+    $gameID = filter_input(INPUT_GET, 'id', FILTER_SANITIZE_NUMBER_INT);
+    $statement->bindValue('id', $gameID, PDO::PARAM_INT);
+    $statement->execute();
+	$row = $statement->fetch();
         
         
-                
-        
-
-		
-
-
-		
-
-	}
-
-
 
 ?>
 <!DOCTYPE html>
@@ -69,38 +50,45 @@ session_start();
 </nav> 
     
 <div class="form-group">
-<form action="post" method="post" enctype='multipart/form-data'>           
+<form action="update_game.php" method="post" enctype='multipart/form-data'>           
     <fieldset>
     <legend>Edit Game</legend>           
+    <?php if(!empty($row['imagePath'])): ?>
     <div class="col-sm-5">
-        <img src="uploads/boxart.jpg" class="card-img-top h-100">     
+        <img src="<?=$row['imagePath'] ?>" class="card-img-top h-100">     
     </div>
-    
-    
+    <?php endif ?>   
+        
+    <input type="hidden" id="imagePath" name="imagePath" value="<?=$row['imagePath']?>">
+        <input type="hidden" id="imageID" name="imageID" value="<?=$row['imageID']?>">
+        <input type="hidden" id="gameID" name="gameID" value="<?=$row['gameID']?>">
     
     
         <div class="px-3" >
             <label for="gameName">Game Name</label>
-            <input name="gameName" id="gameName" class="form-control" placeholder="Game Name" />
+            <input name="gameName" id="gameName" class="form-control" value="<?=$row['gameName']?>" />
         </div> 
             
         <div class="px-3">
             <label for="score">Aggregate Critic Score</label>
-            <input name="score" id="score"  class="form-control" placeholder="Score" />
+            <input name="score" id="score"  class="form-control" value="<?=$row['reviewScore']?>" />
         </div>
             
         <div class="px-3">
             <label for="gameDescription">Game Description</label>
-            <textarea name="gameDescription" id="gameDescription" class="form-control" placeholder="Description here..."></textarea>
+            <textarea name="gameDescription" id="gameDescription" class="form-control"><?=$row['gameDescription']?></textarea>
         </div>
         
         <label for='image'>Image Filename:</label>
          <input type='file' name='file' id='image'>
          
+        
+         <?php if(!empty($row['imagePath'])): ?>
         <div class="px-3">
-            <input type="checkbox" id="image" name="image" value="Remove image?">
+            <input type="checkbox" id="image" name="image" value="yes">
             <label for="image"> Remove image?</label>
         </div>   
+        <?php endif ?>
         
         <div class="px-3">
             <input type="submit" name="command" value="Update" class="btn btn-primary" />

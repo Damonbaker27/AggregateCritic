@@ -8,7 +8,7 @@ session_start();
 	
     
     //query the database for the game passed through the get.
-    $query = "SELECT Games.gameName, Games.gameDescription, games.reviewScore, games.imageID FROM Games  
+    $query = "SELECT Games.gameName, games.gameID, Games.gameDescription, games.reviewScore, games.imageID FROM Games  
       WHERE games.gameid = :id";
        
     $statement = $db->prepare($query);	
@@ -58,7 +58,7 @@ session_start();
 
 <nav class="nav nav-pills nav-fill">  
     <a href="index.php"  class="nav-item nav-link"> Home</a>      
-    <?php if($_SESSION['roleLevel']> 0):?>
+    <?php if($_SESSION['roleLevel']< 3):?>
     <a href="create.php" class="nav-item nav-link" >New Review</a>
     <?php endif ?>
       
@@ -80,19 +80,24 @@ session_start();
 
   <div class="card" style="max-width: 500px";>
     <div class="row g-0" >
-      <div class="col-sm-5">
-        <img src="uploads/boxart.jpg" class="card-img-top h-100" alt="<?=$imagerow['imagePath']?>">
-        
+    <?php if(!empty($row['imagePath'])): ?>  
+    <div class="col-sm-5">
+        <img src="<?=$imagerow['imagePath']?>" class="card-img-top h-100">  
       </div>
+      <?php endif ?>
       <div class="col-sm-7">
         <div class="card-body">
           <h5 class="card-title"><?=$row['gameName']?> Information</h5>
           <p class="card-text"><?= $row['gameDescription'] ?></p>
+          <div>
+          <small><a href="editGame.php?id=<?=$row['gameID']?>">edit</a></small>
+          </div>
+          
         </div>
       </div>
     </div>  
-  </div>    
-    
+  </div>
+</div>    
     <?php while($commentRow = $commentStatement->fetch()): ?> 
       
     <div class="card"> 
@@ -101,8 +106,8 @@ session_start();
         <h4 class="card-title"><?=$commentRow['UserName'] ?></h4>
         <h5 class="card-subtitle mb-3 text-muted"><?= $commentRow['userScore'] ?>/10</h5>
         <h5 class="card-subtitle mb-3 text-muted"><?= $commentRow['reviewContent'] ?></h5>
-        <?php if($_SESSION['roleLevel']== 1 || $_SESSION['loggedin']== 1):?>      
-          <?php if($_SESSION['id']== $commentRow['userID'] || $_SESSION['roleLevel']== 1) :?>
+        <?php if($_SESSION['roleLevel'] <3 || $_SESSION['loggedin']== 1):?>      
+          <?php if($_SESSION['id']== $commentRow['userID'] || $_SESSION['roleLevel'] <3) :?>
         
           <small><a href="edit.php?reviewid=<?=$commentRow['reviewID']?>
           &userid=<?=$commentRow['userID']?>

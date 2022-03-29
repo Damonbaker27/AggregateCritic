@@ -3,18 +3,20 @@
    
   if(!isset($_SESSION['loggedin'])){
     $_SESSION['loggedin'] = 0;
-  }else{
-    $_SESSION['roleLevel']=1;
+  }elseif($_SESSION['loggedin'] == 0){
+    $_SESSION['roleLevel']=3;
   }
 
   if(!isset($_SESSION['roleLevel'])){
-    $_SESSION['roleLevel']=0;
+    $_SESSION['roleLevel']=3;
   }
     
   
   require('db_connect.php');
      
-     $query = "SELECT * FROM games ORDER BY gameName ASC";
+     $query = "SELECT games.gameID, games.gameDescription, games.gameName, Images.imageID, images.imagePath 
+     FROM games 
+     LEFT OUTER JOIN Images ON Images.imageID = games.imageID ORDER BY gameName ASC;";
 
      $statement = $db->prepare($query);
 
@@ -49,12 +51,12 @@
 
   <nav class="nav nav-pills nav-fill">  
     <a href="index.php"  class="nav-item nav-link active"> Home</a>      
-    <?php if($_SESSION['roleLevel']> 0):?>
+    <?php if($_SESSION['roleLevel']< 3):?>
     <a href="create.php" class="nav-item nav-link" >New Review</a>
     <?php endif ?> 
     
     <?php if($_SESSION['roleLevel'] == 0):?>
-    <a href="create.php" class="nav-item nav-link" >New Review</a>
+    <a href="users.php" class="nav-item nav-link" >Manage Users</a>
     <?php endif ?> 
       <?php if($_SESSION['loggedin']== 1):?>           
         <a href="logout.php"class="nav-item nav-link" >Sign out</a>  
@@ -77,7 +79,10 @@
   <?php while($row = $statement->fetch()): ?>
     <div class ="card" style="width: 350px";> 
       <div class="card-body text-center">
-        <img src="uploads/boxart.png" class="card-img-top" alt="Game picture here">
+        <?php if(!empty($row['imagePath'])): ?>
+          <img src="<?=$row['imagePath']?>" class="card-img-top" alt="Game picture here">
+          <?php endif ?>
+
         <h5><a href="show.php?id=<?=$row['gameID'] ?>"><?= $row['gameName'] ?></a></h5>
         <p class="card-text"><?=$row['gameDescription'] ?></p>
         <a href="show.php?id=<?=$row['gameID'] ?>" class="btn btn-primary">View Game</a>        
