@@ -7,7 +7,8 @@ use \Gumlet\ImageResize;
 
     require('db_connect.php');
 
-
+$temporary_image_path;
+$new_image_path;
 
 // file_upload_path() - Safely build a path String that uses slashes appropriate for our OS.
    // Default upload path is an 'uploads' sub-folder in the current folder.
@@ -50,9 +51,9 @@ use \Gumlet\ImageResize;
           
        if(in_array(mime_content_type($_FILES['file']['tmp_name']),$allowed_image_mime_types)){                   
             if(file_is_an_image($temporary_image_path, $new_image_path)){             
-                $imagemedium = new ImageResize($temporary_image_path);
-                $imagemedium->resize(600, 2000);
-                $imagemedium->save($new_image_path); 
+                $image = new ImageResize($temporary_image_path);
+                $image->resize(500, 800,$allow_enlarge = True);
+                $image->save($new_image_path); 
                 
                if(isset($_POST['imagePath'])){     
                     $imageQuery = "SELECT imageID FROM Images WHERE imagePath = :imagePath" ;

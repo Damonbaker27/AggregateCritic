@@ -8,16 +8,16 @@ echo($_POST['gameID']);
 
 
 
-	if (!empty($_POST['gameID']) ) {
+if(!empty($_POST['gameID']) ) {
         
-        $gameID  = filter_input(INPUT_POST, 'gameID', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-        $query = "DELETE FROM games WHERE gameID = :gameID LIMIT 1";
-        $statement = $db->prepare($query);       
+    $gameID  = filter_input(INPUT_POST, 'gameID', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+    $query = "DELETE FROM games WHERE gameID = :gameID LIMIT 1";
+    $statement = $db->prepare($query);       
 
-        $statement->bindValue(':gameID', $gameID, PDO::PARAM_INT);
+    $statement->bindValue(':gameID', $gameID, PDO::PARAM_INT);
 
-		$statement->execute();
-    }   
+    $statement->execute();
+}   
 
 
 
@@ -32,6 +32,7 @@ if(isset($_POST['imageID'])){
     $path = $imagePath;
     if (is_file($path)) {
         unlink($path);
+        echo('file unlinked');
         
         $query = " DELETE FROM images
          WHERE imageID = :imageID LIMIT 1";
@@ -46,17 +47,16 @@ if(isset($_POST['imageID'])){
         $statement = $db->prepare($query);
         $statement->bindValue(':gameID', $updateGameID, PDO::PARAM_INT);
         $statement->execute();
-
+        echo('game deleted');
 
 
     } else {
-        die('your image not found');
+        echo("your image not found");
+        header("location:index.php");
     } 
 }
 		
-
-
-//header("location:index.php");
+header("location:index.php");
 
 
 

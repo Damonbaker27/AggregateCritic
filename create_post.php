@@ -9,9 +9,6 @@ require('db_connect.php');
 
 
 
-
-
-
     // file_upload_path() - Safely build a path String that uses slashes appropriate for our OS.
    // Default upload path is an 'uploads' sub-folder in the current folder.
    function file_upload_path($original_filename, $upload_subfolder_name = 'uploads') {
@@ -29,7 +26,7 @@ require('db_connect.php');
         $allowed_mime_types      = ['image/gif', 'image/jpeg', 'image/png'];
         $allowed_file_extensions = ['gif', 'jpg', 'jpeg', 'png'];
         
-        $actual_file_extension   = pathinfo($new_path, PATHINFO_EXTENSION);
+        $actual_file_extension   = pathinfo($new_path, PATHINFO_EXTENSION);        
         $actual_mime_type        = getimagesize($temporary_path)['mime'];
         
         $file_extension_is_valid = in_array($actual_file_extension, $allowed_file_extensions);
@@ -54,15 +51,17 @@ require('db_connect.php');
           
        if(in_array(mime_content_type($_FILES['file']['tmp_name']),$allowed_image_mime_types)){                   
             if(file_is_an_image($temporary_image_path, $new_image_path)){             
-                $image = new ImageResize($databaselocation);
-                $image->resize(100, 200);
-                $image->save($new_image_path);     
+                $image = new ImageResize($temporary_image_path);
+                $image->resize(500, 800,$allow_enlarge = True);
+                $image->save($new_image_path);
+                
+                     
             }   
-        }           
+        }         
     }
 
     
-    if(isset($_POST['gameName']) && isset($_POST['gameDescription'])){
+    if(isset($_POST['gameName']) && isset($_POST['gameDescription']) && $file_upload_detected){
         //insert the new image path into database.
         if($file_upload_detected){
             $imageQuery = "INSERT INTO images (imagePath, imageName) VALUES (:imagePath, :image)" ;
@@ -122,13 +121,33 @@ require('db_connect.php');
             //execute the query.
             $updateStatement->execute();
             echo("game added without image");  
-            //header("location: index.php");
+            header("location: index.php");
         }
            
           
+    }else{
+        //Sanitize the inputs from the creation form.
+        $gameName = filter_input(INPUT_POST, 'gameName', FILTER_SANITIZE_FULL_SPECIAL_CHARS);    
+        $description = filter_input(INPUT_POST, 'gameDescription', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+        $score = filter_input(INPUT_POST, 'score', FILTER_SANITIZE_FULL_SPECIAL_CHARS);    
+            
+        //insert the values into the games table.
+        $updateQuery = "INSERT INTO games (gameName, gameDescription, reviewScore) 
+            VALUES (:gameName, :gameDescription, :score)";      
+        $updateStatement = $db->prepare($updateQuery);
+
+        //bind the value to the placeholder in the query.
+        $updateStatement->bindValue(":gameName", $gameName);
+        $updateStatement->bindValue(":gameDescription", $description);
+        $updateStatement->bindValue(":score", $score); 
+
+        //execute the query.
+        $updateStatement->execute();
+        echo("game added without image");  
+        header("location: index.php");
     }
 
-
+    
 
 ?>
 
