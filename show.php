@@ -78,9 +78,9 @@ session_start();
  
   
 
-  <div class="card" style="max-width: 500px";>
+  <div class="card" ;>
     <div class="row g-0" >
-    <?php if(!empty($row['imagePath'])): ?>  
+    <?php if(!empty($row['imageID'])): ?>  
     <div class="col-sm-5">
         <img src="<?=$imagerow['imagePath']?>" class="card-img-top h-100">  
       </div>

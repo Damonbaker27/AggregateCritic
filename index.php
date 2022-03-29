@@ -79,7 +79,7 @@
   <?php while($row = $statement->fetch()): ?>
     <div class ="card" style="width: 350px";> 
       <div class="card-body text-center">
-        <?php if(!empty($row['imagePath'])): ?>
+        <?php if(!$row['imageID'] == 0): ?>
           <img src="<?=$row['imagePath']?>" class="card-img-top" alt="Game picture here">
           <?php endif ?>
 
