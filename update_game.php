@@ -1,8 +1,8 @@
 <?php
 session_start();
 
-require 'C:\xampp\htdocs\wd2\Challenges\Challenge 7\php-image-resize-master\lib\ImageResize.php';
-require 'C:\xampp\htdocs\wd2\Challenges\Challenge 7\php-image-resize-master\lib\ImageResizeException.php';
+require 'C:\xampp\htdocs\wd2\Project\php-image-resize-master\lib\ImageResize.php';
+require 'C:\xampp\htdocs\wd2\Project\php-image-resize-master\lib\ImageResizeException.php';
 use \Gumlet\ImageResize;
 
     require('db_connect.php');
@@ -51,12 +51,10 @@ use \Gumlet\ImageResize;
        if(in_array(mime_content_type($_FILES['file']['tmp_name']),$allowed_image_mime_types)){                   
             if(file_is_an_image($temporary_image_path, $new_image_path)){             
                 $imagemedium = new ImageResize($temporary_image_path);
-                $imagemedium->resizeToBestFit(600, 800);
+                $imagemedium->resize(600, 2000);
                 $imagemedium->save($new_image_path); 
-                //header("location: index.php");
                 
-                if(isset($_POST['imagePath'])){
-                    
+               if(isset($_POST['imagePath'])){     
                     $imageQuery = "SELECT imageID FROM Images WHERE imagePath = :imagePath" ;
                     $imageStatement = $db->prepare($imageQuery);
                
@@ -73,37 +71,83 @@ use \Gumlet\ImageResize;
                         $imageStatement->bindValue(":imageID", $row['imageID']);
                         $imageStatement->bindValue(":image", $originalname);
                         $imageStatement ->execute();
+                        echo('image replaced');
                 
-                    }
+                     }else{
+                        $imageQuery = "INSERT INTO images (imagePath, imageName) 
+                        VALUES(:imagePath, :imageName)" ;
+                        $imageStatement = $db->prepare($imageQuery);
+                        $imageStatement->bindValue(":imagePath", $databaselocation );
+                        $imageStatement->bindValue(":imageName", $originalname);
+                        $imageStatement ->execute();
 
+                        $gamesQuery = "SELECT imageID  FROM images  
+                        WHERE imageID = (SELECT max(imageID) FROM images)";
+                        $gameStatement = $db->prepare($gamesQuery);
+                        $gameStatement ->execute();      
+                        $imageRow = $gameStatement->fetch();
 
-                }    
+                        $gameID = filter_input(INPUT_POST, 'gameID', FILTER_SANITIZE_FULL_SPECIAL_CHARS);    
+                              
+                        //insert the values into the games table along with the new image id from the last query.
+                        $updateQuery = "UPDATE Games SET imageID = :imageID 
+                        WHERE gameID = :gameID";      
+                        
+                        $updateStatement = $db->prepare($updateQuery);
+
+                        //bind the value to the placeholder in the query.
+                        $updateStatement->bindValue(":gameID", $gameID);
+                        $updateStatement->bindValue(":imageID", $imageRow['imageID']);
+                        //execute the query.
+                        $updateStatement->execute();
+
+                     }
+               } else{
+                    echo('this condition');
+               }   
             }
+       }else{
+           echo('not an image');
        }
-    }   
+    }else{
+        echo('no upload detected');
+    }  
 
 
 
-
+//deletes the image if the checkbox is selected.
 if(isset($_POST['image'])){
     $imagePath  = filter_input(INPUT_POST, 'imagePath', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-    $imageID = filter_input(INPUT_POST, 'imageID', FILTER_SANITIZE_FULL_SPECIAL_CHARS);    
+    $imageID = filter_input(INPUT_POST, 'imageID', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+    $updateGameID = filter_input(INPUT_POST, 'gameID', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+
     echo("deleted selected");
     $path = $imagePath;
     if (is_file($path)) {
         unlink($path);
-        $query = "UPDATE images SET imagePath = NULL
+        
+        $query = " DELETE FROM images
          WHERE imageID = :imageID LIMIT 1";
+        
         $statement = $db->prepare($query);
         $statement->bindValue(':imageID', $imageID, PDO::PARAM_INT);
         $statement->execute();
+
+
+        $query = "UPDATE games SET imageID = NULL
+         WHERE gameID = :gameID LIMIT 1";
+        $statement = $db->prepare($query);
+        $statement->bindValue(':gameID', $updateGameID, PDO::PARAM_INT);
+        $statement->execute();
+
+
 
     } else {
         die('your image not found');
     } 
 }
 
-
+//updates the game description and information.
 if ($_POST && !empty($_POST['gameName']) && !empty($_POST['gameDescription'])) {
         
     //Sanitize the inputs from the creation form.
