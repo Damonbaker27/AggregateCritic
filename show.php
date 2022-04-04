@@ -39,7 +39,7 @@ session_start();
     $imageStatement->execute();
     $imagerow = $imageStatement->fetch();
     
-  echo($imagerow['imagePath']);
+
 
 ?>
 <!DOCTYPE html>
@@ -87,12 +87,14 @@ session_start();
       <?php endif ?>
       <div class="col-sm-7">
         <div class="card-body">
-          <h5 class="card-title"><?=$row['gameName']?> Information</h5>
+          <h5 class="card-title">Game Information</h5>
           <p class="card-text"><?= $row['gameDescription'] ?></p>
+          
+          <?php if($_SESSION['roleLevel'] <= 1): ?>
           <div>
           <small><a href="editGame.php?id=<?=$row['gameID']?>">edit</a></small>
           </div>
-          
+          <?php endif ?>
         </div>
       </div>
     </div>  
@@ -106,13 +108,13 @@ session_start();
         <h4 class="card-title"><?=$commentRow['UserName'] ?></h4>
         <h5 class="card-subtitle mb-3 text-muted"><?= $commentRow['userScore'] ?>/10</h5>
         <h5 class="card-subtitle mb-3 text-muted"><?= $commentRow['reviewContent'] ?></h5>
-        <?php if($_SESSION['roleLevel'] <3 || $_SESSION['loggedin']== 1):?>      
-          <?php if($_SESSION['id']== $commentRow['userID'] || $_SESSION['roleLevel'] <3) :?>
+        <?php if($_SESSION['roleLevel'] == 0 && $_SESSION['loggedin']== 1):?>      
+          <?php if($_SESSION['id']== $commentRow['userID'] || $_SESSION['roleLevel'] == 0) :?>
         
           <small><a href="edit.php?reviewid=<?=$commentRow['reviewID']?>
           &userid=<?=$commentRow['userID']?>
           &username=<?=$commentRow['UserName']?>"> Edit</a></small>
-        
+          
         
           <?php endif?>
         <?php endif?>       
@@ -124,7 +126,7 @@ session_start();
       <?php endwhile ?>
     
   <div>
- <?php if($_SESSION['loggedin']== 1):?>
+ 
   
   <form action="post_comment.php" method="post"> 
     <fieldset>
@@ -145,13 +147,8 @@ session_start();
             </p>          
     </fieldset>
   </form>
-<?php endif ?>
-<?php if($_SESSION['loggedin']== 0):?>
-
-  <h2><a href="LoginPage.php">login to post comment</a></h2>
 
 
-<?php endif ?>
 
 
 

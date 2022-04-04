@@ -92,6 +92,7 @@ session_start();
         
         <div class="px-3">
             <input type="submit" name="command" value="Update" class="btn btn-primary" />
+            <input type="submit" name="command" value="Delete" class="btn btn-primary" formaction="deleteGame.php" onclick="return confirm('Are you sure you wish to delete this post?')"  />
         </div>
 
     </fieldset>

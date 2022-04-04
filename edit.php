@@ -1,8 +1,6 @@
 <?php
 
 	session_start();
-  echo($_SESSION['gameID']);
-	//require 'authenticate.php';
 
 	require('db_connect.php');
 
@@ -11,19 +9,14 @@
   $userid = filter_input(INPUT_GET, 'userid', FILTER_SANITIZE_NUMBER_INT);
   $username = filter_input(INPUT_GET, 'username', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
 
-  echo($reviewid);
-  echo($userid);
-  echo($username);
 
 	$query = "SELECT * FROM Reviews WHERE reviewID = :reviewid AND userID = :userID LIMIT 1";
     
     if($statement = $db->prepare($query)){
-      echo("statement prepared");
       $statement->bindValue('reviewid', $reviewid, PDO::PARAM_INT);
       $statement->bindValue('userID', $userid, PDO::PARAM_INT);
     
       if($statement->execute()){
-        echo("statment executed");
         $row = $statement->fetch();
       }
 

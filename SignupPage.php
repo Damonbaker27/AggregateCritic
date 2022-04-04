@@ -7,57 +7,136 @@ $username = "";
 $password = "";
 $passwordErrorFlag = false;
 $userNameErrorFlag = false;
+$confirmPasswordFlag = false;
+$passwordError ='';
+$userNameError='';
+$confirmPasswordError ='';
+    //echo($_POST['confirmPassword']);
  
-//checks to see if the username and password has been set.
-if(isset($_POST['username']) && isset($_POST['password'])){
-    echo('  paswsword and username set  ');
-    if(empty($_POST["username"])){
-        echo('  username required  ');
-        $userNameErrorFlag = true;
-    
-    } elseif(!preg_match('/^[a-zA-Z0-9_]+$/', $_POST["username"])){
-        echo('  username cannot contain special chracters  ');
-        $userNameErrorFlag = true;
-    
-    } else {
+    //checks to see if the username and password has been set.
+    if(isset($_POST['username'])){
+        if(empty($_POST["username"])){
+           //echo('username required');
+            $userNameError='username required';
+            $userNameErrorFlag = true;
         
-        $query = "SELECT userID FROM users WHERE userName = :username";
-        if($statement = $db->prepare($query)){
-            $sanitizedUsername = $_POST["username"];
-            $statement->bindValue(":username", $sanitizedUsername, PDO::PARAM_STR);
+        }elseif(!preg_match('/^[a-zA-Z0-9_]+$/', $_POST["username"])){
+            //echo('username cannot contain special characters');
+            $userNameError='username cannot contain special characters';
+            $userNameErrorFlag = true;
+        
+        }else{
             
-            
-            //if the row count is greater than zero that user exists already.
-            if($statement->execute()){
-                if($statement->rowCount() == 1){
-                    echo("This username already exists.");
-                    exit;
-                
-                } else{
-                    $username = $_POST["username"];
+            $query = "SELECT userID FROM users WHERE userName = :username";
+            if($statement = $db->prepare($query)){
+                $sanitizedUsername = $_POST["username"];
+                $statement->bindValue(":username", $sanitizedUsername, PDO::PARAM_STR);
+                   
+                //if the row count is greater than zero that user exists already.
+                if($statement->execute()){
+                    if($statement->rowCount() == 1){
+                        $userNameErrorFlag= true;
+                        $userNameError="This username already exists.";
+                        exit;
+                    
+                    } else{
+                        $username = $_POST["username"];
+                    }
+
+                } else {
+                    $userNameErrorFlag= true;
+                    echo "There was an error processing your request.";
                 }
 
-            } else {
-                echo "There was an error processing your request.";
+                unset($statement);
             }
-
-            unset($statement);
+        }    
+    }else{
+        $userNameError='username required';
+        $userNameErrorFlag = true;
+    }    
+    
+   // handles the password validation. Passwords must be 8 characters or more.
+ if(isset($_POST["password"])){
+    if(empty(trim($_POST["password"]))){
+        $passwordError ='password required';
+        $passwordErrorFlag = true;
+    }elseif(strlen($_POST["password"])<= 8){
+        $passwordError ='password must have 8 or more characters';
+        $passwordErrorFlag = true;
+    }else{
+        $password = trim($_POST["password"]);
+    }
+ }
+   
+if(isset($_POST["confirmPassword"])){
+    //check if the confirm password field matches the password field.
+    if(empty(trim($_POST["confirmPassword"]))){
+        $confirmPasswordError='this field is required';
+        $confirmPasswordFlag = true;
+    }else{
+        if(trim($_POST["confirmPassword"]) != $password){
+            $confirmPasswordError = 'Passwords do not match';
+            $confirmPasswordFlag = true;
         }
     }
+}
+   
     
-    // handles the password validation. Passwords must be 8 characters or more.
-    if(isset($_POST["password"])){     
+
+
+
+
+/*
+    
+    if(!empty($_POST["password"])){     
         if(strlen($_POST["password"])> 8){
             $password = $_POST["password"];
-        }else{
-            echo('password must be more than 8 characters');
+        }elseif(strlen($_POST["password"])== 0){
+            $passwordError ='password required';
             $passwordErrorFlag = true;
-        }       
+        }else{
+            $passwordError ='password must be greater than 8 Characters.';
+            $passwordErrorFlag = true;
+        }      
+    }else{
+        $passwordError ='password required';
+            $passwordErrorFlag = true;
+    }
+
+
+
+
+
+
+    if(!empty($_POST["confirmPassword"])){
+        if(!$_POST["confirmPassword"]== $password){
+            $confirmPasswordFlag = true;
+            $confirmPasswordError = 'Passwords do not match.';
+            echo('passwords dont match');
+        } else {
+            echo($password . '123');
+            echo('suspected condition');
+        } 
+    }else{
+        $confirmPasswordFlag = true;
+        $confirmPasswordError = 'Confirm password is required.';
+        echo('Confirm password is required.');
     }
     
     
+ */  
+    
 
-    if(!$userNameErrorFlag && !$passwordErrorFlag){
+
+
+
+
+
+
+    
+
+    if(!$userNameErrorFlag && !$passwordErrorFlag && !$confirmPasswordFlag){
         
         $query = "INSERT INTO users (userName, password, roleLevel) VALUES (:username, :password, :roleLevel)";
          
@@ -66,7 +145,7 @@ if(isset($_POST['username']) && isset($_POST['password'])){
             $statement->bindParam(":password", $sanitizedPassword, PDO::PARAM_STR);
             $statement->bindParam(":roleLevel", $roleLevel, PDO::PARAM_INT);
             
-            $roleLevel = 0;
+            $roleLevel = 1;
             $sanitizedUsername = $username;
             $sanitizedPassword = password_hash($password, PASSWORD_DEFAULT);
             
@@ -105,7 +184,7 @@ if(isset($_POST['username']) && isset($_POST['password'])){
         }
     }
     
-}
+
 
 ?>
 
@@ -117,6 +196,9 @@ if(isset($_POST['username']) && isset($_POST['password'])){
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        .wrapper{ width: 360px; padding: 20px; }
+    </style>
 </head>
 <body>
 <div id="wrapper">
@@ -136,38 +218,50 @@ if(isset($_POST['username']) && isset($_POST['password'])){
       <?php endif ?>
 
       <?php if($_SESSION['loggedin']== 0):?>
-          <a href="LoginPage.php?" class="nav-item nav-link active">login</a>
+          <a href="LoginPage.php?" class="nav-item nav-link active">Sign in</a>
         <?php endif ?>
 </nav>
 
 
-<form action="SignupPage.php" method="post"> 
-    
+<form action="SignupPage.php" method="post">    
     <fieldset>
       <legend>Sign Up</legend> 
-            
-            <p>
+    <div class="wrapper">      
+      <div class="form-group">       
             <label for="username">User Name</label>
-            <input name="username" id="username" />
-            </p>
-            
-            <p>
+            <input name="username" id="username" class="form-control" />
+            <?php if($userNameErrorFlag):?>
+                <div class="alert alert-danger" role="alert">
+                    <?=$userNameError?>
+                </div>
+            <?php endif ?>          
+      </div>    
+      <div class="form-group">            
             <label for="password">Password</label>
-            <input name="password" id="password" type="password" />
-            </p>
-            
-            <p>
-            <label for="password">Re-enter Password</label>
-            <input name="password" id="password" type="password" placeholder=" Re-enter Password" />
-            </p>
-        
+            <input name="password" id="password" type="password" class="form-control" />
+            <?php if($passwordErrorFlag):?>
+                <div class="alert alert-danger" role="alert">
+                    <?=$passwordError?>
+                </div>
+            <?php endif ?>      
+      </div>  
+      <div class="form-group">   
+            <label for="confirmPassword">Confirm Password</label>
+            <input name="confirmPassword" id="confirmPassword" type="password" class="form-control" />
+            <?php if($confirmPasswordFlag):?>
+                <div class="alert alert-danger" role="alert">
+                    <?=$confirmPasswordError?>
+                </div>
+            <?php endif ?>   
+      </div>
  
-           <p>
+      <div class="form-group">  
+      <p>
             <input type="submit" name="command" value="Register" class="btn btn-primary" />
             </p>
-            
-            <p>Already have and Account? <a href="LoginPage.php">Login here</a> </P>
-            
+      </div>    
+            <p>Already have and Account? <a href="LoginPage.php">Sign in here</a> </P>
+    </div>        
     </fieldset>
   </form>
 </body>
