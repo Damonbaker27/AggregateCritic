@@ -1,6 +1,5 @@
 <?php 
 session_start();
-echo($_POST['search']);
 
 require('db_connect.php');
      

@@ -37,17 +37,36 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 <body>
-<div id="wrapper">
-  <div id="header">
-    <h1><a href="index.php"> Aggregate Critic</a></h1>
-  </div> 
-  
+<div>
+<h1><a href="index.php"> Aggregate Critic</a></h1>
+</div>
+
+<div>
   <?php if($_SESSION['loggedin']== 1):?>
     <h4>Name: <?=$_SESSION['username'] ?></h4>
     <h4>userID: <?=$_SESSION["id"]?></h4>
     <h4>logged in: <?=$_SESSION['loggedin'] ?></h4>
     <h4>roleLevel: <?=$_SESSION['roleLevel'] ?></h4>
   <?php endif ?>
+</div>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
 
   <nav class="nav nav-pills nav-fill">  
     <a href="index.php"  class="nav-item nav-link active"> Home</a>      
@@ -65,6 +84,13 @@
       <?php if($_SESSION['loggedin']== 0):?>
           <a href="LoginPage.php?" class="nav-item nav-link">Sign in</a>
         <?php endif ?>
+
+    <form action="search.php" method="POST">
+      <div class="input-group">
+      <input type="text" placeholder="Search.." name="search" class="form-control">
+      <button type="submit" class="btn btn-secondary">Submit</button>
+      </div>
+    </form>
 </nav>
  
   

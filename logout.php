@@ -11,6 +11,7 @@ if(isset($_SESSION["id"]) || isset($_SESSION['username']) ){
     echo($_SESSION['id']);
 }
 
+session_destroy();
 ?>
 <!DOCTYPE html>
 <html lang="en">

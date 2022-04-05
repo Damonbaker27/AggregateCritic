@@ -69,6 +69,13 @@ session_start();
       <?php if($_SESSION['loggedin']== 0):?>
           <a href="LoginPage.php?" class="nav-item nav-link">login</a>
         <?php endif ?>
+      
+      <form action="search.php" method="POST">
+        <div class="input-group">
+          <input type="text" placeholder="Search.." name="search" class="form-control">
+          <button type="submit" class="btn btn-secondary">Submit</button>
+        </div>
+      </form>
 </nav>   
 
 <div>

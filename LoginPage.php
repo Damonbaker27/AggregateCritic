@@ -15,13 +15,13 @@ if(isset($_SESSION["loggedin"]) && $_SESSION["loggedin"]===true){
 }
 
 if(isset($_POST['submit'])){
-  echo('hello');
+  //echo('hello');
 
   // Check if username is empty. 
   if(!empty($_POST['username'])){  
       $username = trim($_POST["username"]);   
   }else{
-    echo("username is required.");
+    //echo("username is required.");
       $userNameErrorFlag = true;
   }
     
@@ -29,37 +29,37 @@ if(isset($_POST['submit'])){
   //check if the password is set
   if(!empty($_POST["password"])){
     $password = trim($_POST["password"]);
-    echo('     password set    ');
+    //echo('     password set    ');
     //echo($password);
   }else {
     $passwordErrorFlag=true;
-    echo('    password is required    ');
+    //echo('    password is required    ');
   }
 
   //checks if there are any empty fields
   if(!$userNameErrorFlag && !$passwordErrorFlag){
-    echo('no errors');
+    //echo('no errors');
     $query = "SELECT userID, userName, password, roleLevel FROM users WHERE userName = :username";
 
     if($statement = $db->prepare($query)){
-      echo('statement prepared');
+     // echo('statement prepared');
       $sanitizedUsername = $_POST["username"];
       $statement->bindValue(":username", $sanitizedUsername, PDO::PARAM_STR);
       
     if($statement->execute()){
-        echo('statment exceuted');
+       // echo('statment exceuted');
         if($statement->rowCount() == 1){
-          echo('user exists        ');
+         // echo('user exists        ');
           
           if($row = $statement->fetch()){
             
-            echo("statement fetching");
+            //echo("statement fetching");
             $id = $row["userID"];
             $userName = $row["userName"];
             $hashedPassword = $row["password"];             
-            echo($row['password']);
-            echo($password);
-            echo($userName);
+            //echo($row['password']);
+           // echo($password);
+            //echo($userName);
               //verifies the password matches database. 
             if(password_verify($password, $hashedPassword)){                
                 echo('      updating session keys     ');
@@ -74,14 +74,14 @@ if(isset($_POST['submit'])){
 
               }else {
                 $passwordErrorFlag=true;
-                echo("error password did not match");
+               // echo("error password did not match");
               }
           }else{
             $passwordErrorFlag=true;
           }  
         }else{
           $passwordErrorFlag=true;
-          echo('no user found');
+          //echo('no user found');
         }
       } 
     }
@@ -122,6 +122,12 @@ if(isset($_POST['submit'])){
       <?php if($_SESSION['loggedin']== 0):?>
           <a href="LoginPage.php?" class="nav-item nav-link active">Sign in</a>
         <?php endif ?>
+        <form action="search.php" method="POST">
+      <div class="input-group">
+      <input type="text" placeholder="Search.." name="search" class="form-control">
+      <button type="submit" class="btn btn-secondary">Submit</button>
+      </div>
+    </form>
 </nav>
 
 
