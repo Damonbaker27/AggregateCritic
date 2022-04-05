@@ -12,7 +12,7 @@ $passwordError ='';
 $userNameError='';
 $confirmPasswordError ='';
     //echo($_POST['confirmPassword']);
- 
+if(isset($_POST['submit'])){
     //checks to see if the username and password has been set.
     if(isset($_POST['username'])){
         if(empty($_POST["username"])){
@@ -25,8 +25,7 @@ $confirmPasswordError ='';
             $userNameError='username cannot contain special characters';
             $userNameErrorFlag = true;
         
-        }else{
-            
+        }else{          
             $query = "SELECT userID FROM users WHERE userName = :username";
             if($statement = $db->prepare($query)){
                 $sanitizedUsername = $_POST["username"];
@@ -37,7 +36,6 @@ $confirmPasswordError ='';
                     if($statement->rowCount() == 1){
                         $userNameErrorFlag= true;
                         $userNameError="This username already exists.";
-                        exit;
                     
                     } else{
                         $username = $_POST["username"];
@@ -56,8 +54,8 @@ $confirmPasswordError ='';
         $userNameErrorFlag = true;
     }    
     
-   // handles the password validation. Passwords must be 8 characters or more.
- if(isset($_POST["password"])){
+    // handles the password validation. Passwords must be 8 characters or more.
+    if(isset($_POST["password"])){
     if(empty(trim($_POST["password"]))){
         $passwordError ='password required';
         $passwordErrorFlag = true;
@@ -67,9 +65,9 @@ $confirmPasswordError ='';
     }else{
         $password = trim($_POST["password"]);
     }
- }
-   
-if(isset($_POST["confirmPassword"])){
+    }
+
+    if(isset($_POST["confirmPassword"])){
     //check if the confirm password field matches the password field.
     if(empty(trim($_POST["confirmPassword"]))){
         $confirmPasswordError='this field is required';
@@ -80,60 +78,8 @@ if(isset($_POST["confirmPassword"])){
             $confirmPasswordFlag = true;
         }
     }
-}
+
    
-    
-
-
-
-
-/*
-    
-    if(!empty($_POST["password"])){     
-        if(strlen($_POST["password"])> 8){
-            $password = $_POST["password"];
-        }elseif(strlen($_POST["password"])== 0){
-            $passwordError ='password required';
-            $passwordErrorFlag = true;
-        }else{
-            $passwordError ='password must be greater than 8 Characters.';
-            $passwordErrorFlag = true;
-        }      
-    }else{
-        $passwordError ='password required';
-            $passwordErrorFlag = true;
-    }
-
-
-
-
-
-
-    if(!empty($_POST["confirmPassword"])){
-        if(!$_POST["confirmPassword"]== $password){
-            $confirmPasswordFlag = true;
-            $confirmPasswordError = 'Passwords do not match.';
-            echo('passwords dont match');
-        } else {
-            echo($password . '123');
-            echo('suspected condition');
-        } 
-    }else{
-        $confirmPasswordFlag = true;
-        $confirmPasswordError = 'Confirm password is required.';
-        echo('Confirm password is required.');
-    }
-    
-    
- */  
-    
-
-
-
-
-
-
-
     
 
     if(!$userNameErrorFlag && !$passwordErrorFlag && !$confirmPasswordFlag){
@@ -167,25 +113,15 @@ if(isset($_POST["confirmPassword"])){
                         $_SESSION['roleLevel'] = $row['roleLevel'];
 
                         header("location: index.php");
-
-
-                    }
-                    
-                    
-                    
+                    }                  
                 }
-
-
-
-                //header("location: index.php");
             } else{
                 echo "There was an error processing your request.";
             }
         }
-    }
-    
-
-
+    }  
+}
+}
 ?>
 
 <!DOCTYPE html>
@@ -257,7 +193,7 @@ if(isset($_POST["confirmPassword"])){
  
       <div class="form-group">  
       <p>
-            <input type="submit" name="command" value="Register" class="btn btn-primary" />
+            <input type="submit" name="submit" value="Register" class="btn btn-primary" />
             </p>
       </div>    
             <p>Already have and Account? <a href="LoginPage.php">Sign in here</a> </P>

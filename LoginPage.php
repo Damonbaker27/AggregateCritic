@@ -14,80 +14,80 @@ if(isset($_SESSION["loggedin"]) && $_SESSION["loggedin"]===true){
   exit;
 }
 
+if(isset($_POST['submit'])){
+  echo('hello');
 
-  if(!empty($_POST['username']) || !empty($_POST['password'])){
-
-    // Check if username is empty.
-    if(!empty($_POST["username"])){
-      $username = trim($_POST["username"]);
-      
-    }else{
-      echo("username is required.");
-      $userNameErrorFlag = true;
-    }
-
-    //check if the password is set
-    if(!empty($_POST["password"])){
-      $password = $_POST["password"];
-      echo('     password set    ');
-      //echo($password);
-    }else {
-      $passwordErrorFlag=true;
-      echo('    password is required    ');
-    }
-
-    //checks if there are any empty fields
-    if(!$userNameErrorFlag && !$passwordErrorFlag){
-      echo('no errors');
-      $query = "SELECT userID, userName, password, roleLevel FROM users WHERE userName = :username";
-
-      if($statement = $db->prepare($query)){
-        echo('statement prepared');
-        $sanitizedUsername = $_POST["username"];
-        $statement->bindValue(":username", $sanitizedUsername, PDO::PARAM_STR);
-        
-      if($statement->execute()){
-          echo('statment exceuted');
-          if($statement->rowCount() == 1){
-           echo('user exists        ');
-            
-            if($row = $statement->fetch()){
-              
-              echo("statement fetching");
-              $id = $row["userID"];
-              $userName = $row["userName"];
-              $hashedPassword = $row["password"];             
-              echo($row['password']);
-              echo($password);
-              echo($userName);
-               //verifies the password matches database. 
-              if(password_verify($password, $hashedPassword)){                
-                  echo('      updating session keys     ');
-                  //session_start();
-                  $_SESSION["username"]= $username;
-                  $_SESSION["id"] = $id;
-                  $_SESSION["loggedin"] = true;
-                  $_SESSION['roleLevel']= $row['roleLevel'];
-
-                  
-                  header("location: index.php");
-
-                }else {
-                echo("error password did not match");
-                }
-            }else{
-              //echo('')
-            }  
-          }else{
-            echo('no user found');
-          }
-        } 
-      }
-    }
+  // Check if username is empty. 
+  if(!empty($_POST['username'])){  
+      $username = trim($_POST["username"]);   
   }else{
+    echo("username is required.");
+      $userNameErrorFlag = true;
+  }
+    
+  
+  //check if the password is set
+  if(!empty($_POST["password"])){
+    $password = trim($_POST["password"]);
+    echo('     password set    ');
+    //echo($password);
+  }else {
+    $passwordErrorFlag=true;
+    echo('    password is required    ');
+  }
+
+  //checks if there are any empty fields
+  if(!$userNameErrorFlag && !$passwordErrorFlag){
+    echo('no errors');
+    $query = "SELECT userID, userName, password, roleLevel FROM users WHERE userName = :username";
+
+    if($statement = $db->prepare($query)){
+      echo('statement prepared');
+      $sanitizedUsername = $_POST["username"];
+      $statement->bindValue(":username", $sanitizedUsername, PDO::PARAM_STR);
+      
+    if($statement->execute()){
+        echo('statment exceuted');
+        if($statement->rowCount() == 1){
+          echo('user exists        ');
+          
+          if($row = $statement->fetch()){
+            
+            echo("statement fetching");
+            $id = $row["userID"];
+            $userName = $row["userName"];
+            $hashedPassword = $row["password"];             
+            echo($row['password']);
+            echo($password);
+            echo($userName);
+              //verifies the password matches database. 
+            if(password_verify($password, $hashedPassword)){                
+                echo('      updating session keys     ');
+                //session_start();
+                $_SESSION["username"]= $username;
+                $_SESSION["id"] = $id;
+                $_SESSION["loggedin"] = true;
+                $_SESSION['roleLevel']= $row['roleLevel'];
+
+                
+                header("location: index.php");
+
+              }else {
+                $passwordErrorFlag=true;
+                echo("error password did not match");
+              }
+          }else{
+            $passwordErrorFlag=true;
+          }  
+        }else{
+          $passwordErrorFlag=true;
+          echo('no user found');
+        }
+      } 
+    }
   }
  
-
+}
 ?>
 
 <!DOCTYPE html>
@@ -98,6 +98,9 @@ if(isset($_SESSION["loggedin"]) && $_SESSION["loggedin"]===true){
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        .wrapper{ width: 360px; padding: 20px; }
+    </style>
 </head>
 <body>
 <div id="wrapper">
@@ -123,20 +126,30 @@ if(isset($_SESSION["loggedin"]) && $_SESSION["loggedin"]===true){
 
 
 
-
+<div class="wrapper">
 <form action="LoginPage.php" method="post"> 
     <fieldset>             
       
-      <div class="px-3">
+      <div class="form-group">
         <label class="form-label" for="username">User Name</label>
         <input class="form-control" name="username" id="username" placeholder="User Name" />
-      </div>            
-      <div class="px-3">
+      </div>
+
+      <div class="form-group">
         <label class="form-label" for="password">Password</label>
         <input class="form-control" name="password" id="password" type="password" placeholder="Password" />
       </div>
-      <div class="px-3">
-        <input type="submit" name="command" value="Sign in" class="btn btn-primary" />
+
+      <?php if($passwordErrorFlag || $userNameErrorFlag):?>
+        <div class="alert alert-danger" role="alert">
+          <p>username or password incorrect.</p>
+        </div>
+      <?php endif ?>
+      
+      
+      
+      <div class="form-group">
+        <input type="submit" name="submit" value="Sign in" class="btn btn-primary" />
         <div >
         <small>No Account? <a href="SignupPage.php">Create one </small>
         </div>
@@ -146,5 +159,6 @@ if(isset($_SESSION["loggedin"]) && $_SESSION["loggedin"]===true){
             
     </fieldset>
   </form>
+</div>
 </body>
 </html>
