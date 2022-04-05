@@ -1,5 +1,5 @@
 <?php 
-
+session_start();
 echo($_POST['search']);
 
 require('db_connect.php');
@@ -7,16 +7,17 @@ require('db_connect.php');
      $query = "SELECT games.gameID, games.gameDescription, games.gameName, Images.imageID, images.imagePath 
      FROM games 
      LEFT OUTER JOIN Images ON Images.imageID = games.imageID 
-     WHERE games.gameName LIKE '%:search%'
+     WHERE games.gameName LIKE :search
      ORDER BY gameName ASC;";
 
      $statement = $db->prepare($query);
 
-     $gameName = filter_input(INPUT_POST, 'search', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-     $statement->bindValue('id', $gameName, PDO::PARAM_STR);
+     $search = filter_input(INPUT_POST, 'search', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+     $pattern = '%' . $search . '%';
+     $statement->bindValue('search', $pattern, PDO::PARAM_STR);
      $statement->execute();
      
-
+   
 
 
 ?>
@@ -56,9 +57,14 @@ require('db_connect.php');
       <?php if($_SESSION['loggedin']== 0):?>
           <a href="LoginPage.php?" class="nav-item nav-link">Sign in</a>
         <?php endif ?>
+        <form action="search.php" method="POST">
+      <div class="input-group">
+      <input type="text" placeholder="Search.." name="search" class="form-control">
+      <button type="submit" class="btn btn-secondary">Submit</button>
+      </div>
 </nav>
  
-  
+<h1><?= $statement->rowCount() ?> Games found</h1>
   
 
  <div class="row">
