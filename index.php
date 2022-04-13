@@ -46,29 +46,22 @@
     <h4>Name: <?=$_SESSION['username'] ?></h4>
     <h4>userID: <?=$_SESSION["id"]?></h4>
     <h4>logged in: <?=$_SESSION['loggedin'] ?></h4>
-    <h4>roleLevel: <?=$_SESSION['roleLevel'] ?></h4>
+
+    <?php if($_SESSION['roleLevel']== 0):?>
+        <h4>Admin</h4>       
+    <?php elseif($_SESSION['roleLevel']== 1): ?>
+        <h4>Regular user</h4>                
+    <?php endif ?>
+
+
+
+
+
   <?php endif ?>
 </div>
   
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  
-  
-
-  <nav class="nav nav-pills nav-fill">  
+<nav class="nav nav-pills nav-fill">  
     <a href="index.php"  class="nav-item nav-link active"> Home</a>      
     <?php if($_SESSION['roleLevel']< 3):?>
     <a href="create.php" class="nav-item nav-link" >New Review</a>
@@ -78,7 +71,7 @@
     <a href="users.php" class="nav-item nav-link" >Manage Users</a>
     <?php endif ?> 
       <?php if($_SESSION['loggedin']== 1):?>           
-        <a href="logout.php"class="nav-item nav-link" >Sign out</a>  
+        <a href="logout.php"class="nav-item nav-link" onclick="return confirm('Are you sure you would like to sign out?')" >Sign out</a>  
       <?php endif ?>
 
       <?php if($_SESSION['loggedin']== 0):?>

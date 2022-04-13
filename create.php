@@ -20,6 +20,10 @@ session_start();
 <nav class="nav nav-pills nav-fill">  
     <a href="index.php"  class="nav-item nav-link"> Home</a>      
     <a href="create.php" class="nav-item nav-link active" >New Review</a>
+
+    <?php if($_SESSION['roleLevel'] == 0):?>
+    <a href="users.php" class="nav-item nav-link " >Manage Users</a>
+    <?php endif ?>
       
       <?php if($_SESSION['loggedin']== 1):?>           
         <a href="logout.php"class="nav-item nav-link" >Sign out</a>  
