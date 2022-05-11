@@ -14,14 +14,11 @@ if(isset($_SESSION["loggedin"]) && $_SESSION["loggedin"]===true){
   exit;
 }
 
-if(isset($_POST['submit'])){
-  //echo('hello');
-
+if(isset($_POST['submit'])){ 
   // Check if username is empty. 
   if(!empty($_POST['username'])){  
       $username = trim($_POST["username"]);   
-  }else{
-    //echo("username is required.");
+  }else{  
       $userNameErrorFlag = true;
   }
     
@@ -29,38 +26,28 @@ if(isset($_POST['submit'])){
   //check if the password is set
   if(!empty($_POST["password"])){
     $password = trim($_POST["password"]);
-    //echo('     password set    ');
-    //echo($password);
+  
   }else {
-    $passwordErrorFlag=true;
-    //echo('    password is required    ');
+    $passwordErrorFlag=true;   
   }
 
   //checks if there are any empty fields
   if(!$userNameErrorFlag && !$passwordErrorFlag){
-    //echo('no errors');
+    
     $query = "SELECT userID, userName, password, roleLevel FROM users WHERE userName = :username";
 
     if($statement = $db->prepare($query)){
-     // echo('statement prepared');
       $sanitizedUsername = $_POST["username"];
       $statement->bindValue(":username", $sanitizedUsername, PDO::PARAM_STR);
       
-    if($statement->execute()){
-       // echo('statment exceuted');
-        if($statement->rowCount() == 1){
-         // echo('user exists        ');
-          
-          if($row = $statement->fetch()){
-            
-            //echo("statement fetching");
+    if($statement->execute()){  
+        if($statement->rowCount() == 1){          
+          if($row = $statement->fetch()){               
             $id = $row["userID"];
             $userName = $row["userName"];
             $hashedPassword = $row["password"];             
-            //echo($row['password']);
-           // echo($password);
-            //echo($userName);
-              //verifies the password matches database. 
+            
+            //verifies the password matches database. 
             if(password_verify($password, $hashedPassword)){                
                 echo('      updating session keys     ');
                 //session_start();
@@ -68,20 +55,17 @@ if(isset($_POST['submit'])){
                 $_SESSION["id"] = $id;
                 $_SESSION["loggedin"] = true;
                 $_SESSION['roleLevel']= $row['roleLevel'];
-
-                
+              
                 header("location: index.php");
 
               }else {
-                $passwordErrorFlag=true;
-               // echo("error password did not match");
+                $passwordErrorFlag=true;              
               }
           }else{
             $passwordErrorFlag=true;
           }  
         }else{
           $passwordErrorFlag=true;
-          //echo('no user found');
         }
       } 
     }
